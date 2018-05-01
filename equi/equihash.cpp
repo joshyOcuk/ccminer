@@ -125,16 +125,16 @@ static void cb_solution(int thr_id, const std::vector<uint32_t>& solutions, size
 		nSolution = GetMinimalFromIndices(solutions, cbitlen);
 	} else {
 		gpulog(LOG_INFO, thr_id, "compressed_sol");
-		nSolution = std::vector<unsigned char>(1344);
+		nSolution = std::vector<unsigned char>(400);
 		for (size_t i = 0; i < cbitlen; i++)
 			nSolution[i] = compressed_sol[i];
 	}
 	int nsol = valid_sols[thr_id];
 	if (nsol < 0) nsol = 0;
-	if(nSolution.size() == 1344) {
+	if(nSolution.size() == 400) {
 		// todo, only store solution data here...
 		le32enc(&data_sols[thr_id][nsol][140], 0x000540fd); // sol sz header
-		memcpy(&data_sols[thr_id][nsol][143], nSolution.data(), 1344);
+		memcpy(&data_sols[thr_id][nsol][143], nSolution.data(), 400);
 		valid_sols[thr_id] = nsol + 1;
 	}
 }
@@ -223,7 +223,7 @@ extern "C" int scanhash_equihash(int thr_id, struct work *work, uint32_t max_non
 		{
 			const uint32_t Htarg = ptarget[7];
 			uint32_t _ALIGN(64) vhash[8];
-			uint8_t _ALIGN(64) full_data[140+3+1344] = { 0 };
+			uint8_t _ALIGN(64) full_data[140+3+400] = { 0 };
 			uint8_t* sol_data = &full_data[140];
 
 			soluce_count += valid_sols[thr_id];
@@ -231,8 +231,8 @@ extern "C" int scanhash_equihash(int thr_id, struct work *work, uint32_t max_non
 			for (int nsol=0; nsol < valid_sols[thr_id]; nsol++)
 			{
 				memcpy(full_data, endiandata, 140);
-				memcpy(sol_data, &data_sols[thr_id][nsol][140], 1347);
-				equi_hash(full_data, vhash, 140+3+1344);
+				memcpy(sol_data, &data_sols[thr_id][nsol][140], 403);
+				equi_hash(full_data, vhash, 140+3+400);
 
 				if (vhash[7] <= Htarg && fulltest(vhash, ptarget))
 				{
