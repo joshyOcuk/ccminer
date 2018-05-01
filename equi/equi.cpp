@@ -39,7 +39,7 @@ static void digestInit(blake2b_state *S, const uint32_t n, const uint32_t k)
 #ifdef USE_LIBSODIUM
 	uint8_t personalization[crypto_generichash_blake2b_PERSONALBYTES] = { 0 };
 
-	memcpy(personalization, "ZcashPoW", 8);
+	memcpy(personalization, "ZERO_PoW", 8);
 	memcpy(personalization + 8,  &le_N, 4);
 	memcpy(personalization + 12, &le_K, 4);
 
@@ -135,8 +135,8 @@ static int isZero(const uint8_t *hash, size_t len)
 // soln -> equihash solution (excluding 3 bytes with size, so 1344 bytes length)
 bool equi_verify(uint8_t* const hdr, uint8_t* const soln)
 {
-	const uint32_t n = WN; // 200
-	const uint32_t k = WK; // 9
+	const uint32_t n = WN; // 192
+	const uint32_t k = WK; // 7
 	const uint32_t collisionBitLength = n / (k + 1);
 	const uint32_t collisionByteLength = (collisionBitLength + 7) / 8;
 	const uint32_t hashLength = (k + 1) * collisionByteLength;
@@ -145,7 +145,7 @@ bool equi_verify(uint8_t* const hdr, uint8_t* const soln)
 	const uint32_t equihashSolutionSize = (1 << k) * (n / (k + 1) + 1) / 8;
 	const uint32_t solnr = 1 << k;
 
-	uint32_t indices[512] = { 0 };
+	uint32_t indices[128] = { 0 };
 	uint8_t vHash[hashLength] = { 0 };
 
 	blake2b_state state;
@@ -156,7 +156,7 @@ bool equi_verify(uint8_t* const hdr, uint8_t* const soln)
 	eq_blake2b_update(&state, hdr, 140);
 #endif
 
-	expandArray(soln, equihashSolutionSize, (uint8_t*) &indices, sizeof(indices), collisionBitLength + 1, 1);
+	expandArray(soln, equihashSolutionSize, (uint8_t*) &indices, sizeof(indices), collisionBitLength + 1, 0);
 
 	for (uint32_t j = 0; j < solnr; j++) {
 		uint8_t tmpHash[hashOutput];
